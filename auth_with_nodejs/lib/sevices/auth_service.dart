@@ -37,7 +37,6 @@ class AuthService {
           msg: e.message,
           gravity: ToastGravity.BOTTOM,
           toastLength: Toast.LENGTH_SHORT);
-      print("hata" + e.message);
     }
   }
 

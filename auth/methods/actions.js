@@ -8,7 +8,7 @@ const bcrypt=require('bcryptjs');
 const functions ={
 addNewUser: function (req,res) {
     const {username,password} = req.body;
-  if((req.body.username == null) || (req.body.password) ==null ){
+  if((req.body.username === null) || (req.body.password) === null ){
       res.json({ success: false, msg: 'enter all fields' });
 
   }else{
@@ -22,7 +22,7 @@ addNewUser: function (req,res) {
         promise.then((newUser)=>{
          res.json({success:true,newUser});
         }).catch((err)=>{
-         res.json(json);
+         res.json({success:false,msg: 'try another usernama'});
         });
     })
   }
@@ -61,7 +61,7 @@ getInfo:(req,res)=>{
  if(req.headers.authorization && req.headers.authorization.split(' ')[0] ==='Bearer'){
     var token=req.headers.authorization.split(' ')[1];
     var decodeToken = jwt.decode(token,configKey.secret_key);
-    res.json({success:true,msg:'hello'+decodeToken.username})
+    res.json({success:true,msg:decodeToken.username})
  }
 }
 

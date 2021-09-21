@@ -1,7 +1,11 @@
+import 'package:auth_with_nodejs/screens/home_screen.dart';
 import 'package:auth_with_nodejs/sevices/auth_service.dart';
+import 'package:auth_with_nodejs/viewodel/user_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:provider/provider.dart';
 import 'package:regexpattern/regexpattern.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -15,17 +19,19 @@ class _LoginState extends State<Login> {
   final passwordKey = GlobalKey<FormState>();
   final usernameKey = GlobalKey<FormState>();
   bool passwordAuto;
+  String result;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    passwordAuto= false;
+    passwordAuto = false;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final userViewModel = Provider.of<UserViewModel>(context);
+    return userViewModel.usersViewState==UsersViewState.Idle ?  Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: Colors.green.shade100,
       appBar: AppBar(
@@ -41,10 +47,10 @@ class _LoginState extends State<Login> {
               child: TextFormField(
                 // ignore: deprecated_member_use
                 autovalidate: passwordAuto,
-                validator: (username){
-                  if(username.isUsername()){
+                validator: (username) {
+                  if (username.isUsername()) {
                     return null;
-                  }else{
+                  } else {
                     return 'Username error please try again';
                   }
                 },
@@ -57,7 +63,7 @@ class _LoginState extends State<Login> {
               ),
             ),
           ),
-          Padding( 
+          Padding(
             padding: const EdgeInsets.only(left: 20.0, right: 20, top: 20),
             child: Form(
               key: passwordKey,
@@ -87,17 +93,23 @@ class _LoginState extends State<Login> {
           RaisedButton(
             onPressed: () async {
               if (!passwordKey.currentState.validate()) {
-                  setState(() {
-                    passwordAuto=true;
-                  });
+                setState(() {
+                  passwordAuto = true;
+                });
               } else {
                 passwordKey.currentState.save();
-                await AuthService().login(username, password).then((val) {
-                  if (val.data['success']) {
-                    token = val.data['token'];
-                    Fluttertoast.showToast(msg: "Authentication success");
-                  }
-                });
+                await userViewModel.login(username, password);
+                await userViewModel.getToken();
+                result = userViewModel.resultMessage;
+                token = userViewModel.token;
+                print(token);
+                if (result == null) {
+                  Fluttertoast.showToast(msg: 'Success');
+                  Navigator.pushReplacement(context,
+                      MaterialPageRoute(builder: (context) => HomePage()));
+                } else {
+                  Fluttertoast.showToast(msg: result.toString());
+                }
               }
             },
             shape: RoundedRectangleBorder(
@@ -122,16 +134,19 @@ class _LoginState extends State<Login> {
             onPressed: () async {
               if (!passwordKey.currentState.validate()) {
                 setState(() {
-                  passwordAuto=true;
+                  passwordAuto = true;
                 });
-              }else{
-                await AuthService().addUser(username, password).then((val) => {
-                  if (val.data['success'])
-                    {Fluttertoast.showToast(msg: "Account created")}
-                });
+              } else {
+                await userViewModel.signUp(username, password);
+                result = userViewModel.resultMessage;
+                if (result == null) {
+                  Fluttertoast.showToast(msg: 'success');
+                  Navigator.pushReplacement(context,
+                      MaterialPageRoute(builder: (context) => HomePage()));
+                } else {
+                  Fluttertoast.showToast(msg: result.toString());
+                }
               }
-
-
             },
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(5))),
@@ -143,6 +158,6 @@ class _LoginState extends State<Login> {
           ),
         ],
       ),
-    );
+    ) : Center(child: CircularProgressIndicator(),);
   }
 }
