@@ -63,7 +63,33 @@ getInfo:(req,res)=>{
     var decodeToken = jwt.decode(token,configKey.secret_key);
     res.json({success:true,msg:decodeToken.username})
  }
+},
+
+delete:(req,res)=>{
+const{username,password}=req.body;
+const promise =User.findOneAndDelete({username:username});
+promise.then((result)=>{
+if(result){
+ res.json({success:true,msg:'Account deleted'});
+}else{
+  res.json({success:true,msg:'Account didnt delete'});
 }
+});
+
+},
+
+  update: (req, res) => {
+  const promise = User.findOneAndUpdate(req.params.username,req.body,{new:true});
+  promise.then((result)=>{
+    if(result){
+      res.json({success:true,msg:'updated'});
+     }else{
+       res.json({success:true,msg:' didnt updated'});
+     }
+  });
+
+
+},
 
 }
 module.exports=functions;
