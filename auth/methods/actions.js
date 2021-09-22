@@ -3,27 +3,33 @@ const jwt = require('jsonwebtoken');
 const config = require('../config/db');
 const configKey=require('../config/config');
 const bcrypt=require('bcryptjs');
+const Profile = require('../models/Profile');
+let random=Math.floor(Math.random() * 10000).toString;
+
 //const user = require('../models/user');
 
 const functions ={
 addNewUser: function (req,res) {
     const {username,password} = req.body;
   if((req.body.username === null) || (req.body.password) === null ){
-      res.json({ success: false, msg: 'enter all fields' });
+    res.json({ success: false, msg: 'enter all fields' });
 
   }else{
    
-    bcrypt.hash(password,10).then((hash)=>{
-        const user = new User({
-            username:username,
-            password:hash
+    bcrypt.hash(password, 10).then((hash) => {
+      const user = new User({
+          username: username,
+          password: hash
         });
-        const promise = user.save();
-        promise.then((newUser)=>{
-         res.json({success:true,newUser});
+    
+      const promise = user.save();
+      promise.then((newUser) => {
+         
+          res.json({success:true,newUser});
+          
         }).catch((err)=>{
-         res.json({success:false,msg: 'try another usernama'});
-        });
+         res.json({success:false,msg: 'try another username'});
+        });    
     })
   }
     
@@ -90,6 +96,52 @@ if(result){
 
 
 },
+updateProfile:(req,res)=>{
+    const promise = profile.findOneAndUpdate(req.params.username, req.body, { new: true });
+    promise.then((result) => {
+  if (result) {
+    res.json({success:true,msg:'updated'});
+  } else {
+     res.json({success:true,msg:' didnt updated'});
+  }
+    });
+},
+
+addProfileInfos:(req,res)=>{
+  const {username,password}=req.body;
+  Profile.findOne({username:username}).then((result)=>{
+  if(result){
+    res.json({success:false,msg:'error'});
+  }else{
+    const profile = new Profile({
+      username: username,
+  
+    })
+    profile.save().then((result)=>{
+    if(result!=null){
+      res.json({success:true,msg:'loaded'});
+    }else{
+      res.json({success:false,msg:'error'});
+    }
+  
+    });
+  }
+  });
+ 
+},
+
+getProfileInfos:(req,res)=>{
+  const{username,password}=req.body;
+  const promise = Profile.findOne({username:username });
+   promise.then((data)=>{
+    if(data!=null){
+      res.json({success:true,msg:data});
+    }else{
+      res.json({success:false,msg:'data dont find'});
+    }
+   })
+},
+
 
 }
 module.exports=functions;
