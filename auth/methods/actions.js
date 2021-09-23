@@ -131,11 +131,11 @@ addProfileInfos:(req,res)=>{
 },
 
 getProfileInfos:(req,res)=>{
-  const{username,password}=req.body;
-  const promise = Profile.findOne({username:username });
+  const promise = Profile.find();
    promise.then((data)=>{
     if(data!=null){
-      res.json({success:true,msg:data});
+      res.json({success:true,data:data});
+      return data;
     }else{
       res.json({success:false,msg:'data dont find'});
     }

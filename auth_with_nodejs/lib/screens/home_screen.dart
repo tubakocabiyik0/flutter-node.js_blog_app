@@ -1,3 +1,4 @@
+import 'package:auth_with_nodejs/screens/profile_screen.dart';
 import 'package:auth_with_nodejs/viewodel/user_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -25,17 +26,15 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final userViewModel = Provider.of<UserViewModel>(context);
 
-
     token(userViewModel).then((value) => {
           userToken = value,
           print("burası" + userToken),
           userViewModel.getUserInfo(userToken).then((value) => {
-            this.setState(() {
-              username = value;
-            }),
+                this.setState(() {
+                  username = value;
+                }),
                 print(username),
-
-          }),
+              }),
         });
     return userViewModel.usersViewState == UsersViewState.Idle
         ? SafeArea(
@@ -44,6 +43,14 @@ class _HomePageState extends State<HomePage> {
               appBar: AppBar(
                 backgroundColor: Colors.green.shade100,
                 actions: [
+                  IconButton(
+                      icon: Icon(Icons.person),
+                      color: Colors.black,
+                      iconSize: 27,
+                      onPressed: () {
+                        Navigator.pushReplacement(context,
+                            MaterialPageRoute(builder: (context) => Profile()));
+                      }),
                   IconButton(
                     icon: Icon(Icons.logout),
                     color: Colors.black,
@@ -62,7 +69,7 @@ class _HomePageState extends State<HomePage> {
               ),
               body: username == null
                   ? Center(child: CircularProgressIndicator())
-                  :  Text(username),
+                  : Text(username),
             ),
           )
         : Center(

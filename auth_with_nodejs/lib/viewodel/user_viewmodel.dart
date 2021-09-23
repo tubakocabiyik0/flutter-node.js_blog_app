@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:auth_with_nodejs/model/Profile.dart';
 import 'package:auth_with_nodejs/sevices/auth_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -94,6 +95,7 @@ class UserViewModel with ChangeNotifier {
       await AuthService().addUser(username, password).then((val) async {
         if (val.data['success']) {
           await login(username, password);
+          await addProfile(username);
           return Future.value(null);
         } else {
           String result = val.data['msg'].toString();
@@ -122,6 +124,31 @@ class UserViewModel with ChangeNotifier {
     } catch (e) {
       return Future.value(false);
     } finally {
+      _usersViewState = UsersViewState.Idle;
+    }
+  }
+
+  Future<bool> addProfile(String username) async {
+    try {
+      _usersViewState = UsersViewState.Busy;
+      await AuthService().addProfileInfo(username).then((result) async {
+        if (result.data['success']) {
+          return Future.value(true);
+        } else {
+          return Future.value(false);
+        }
+      });
+    } finally {
+      _usersViewState = UsersViewState.Idle;
+    }
+
+  }
+
+  Future<List<Data>> getProfile () async{
+    try{
+      _usersViewState = UsersViewState.Busy;
+      return await AuthService().getProfileInfo();
+    }finally{
       _usersViewState = UsersViewState.Idle;
     }
   }
