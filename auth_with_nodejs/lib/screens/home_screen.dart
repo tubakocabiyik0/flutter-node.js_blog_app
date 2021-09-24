@@ -13,13 +13,14 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
   }
+  @override
+
 
   String userToken;
-  String getName;
   String username = null;
 
   @override
@@ -28,11 +29,13 @@ class _HomePageState extends State<HomePage> {
 
     token(userViewModel).then((value) => {
           userToken = value,
-          print("burası" + userToken),
           userViewModel.getUserInfo(userToken).then((value) => {
-                this.setState(() {
-                  username = value;
-                }),
+                if (this.mounted)
+                  {
+                    this.setState(() {
+                      username = value;
+                    }),
+                  },
                 print(username),
               }),
         });
@@ -48,8 +51,9 @@ class _HomePageState extends State<HomePage> {
                       color: Colors.black,
                       iconSize: 27,
                       onPressed: () {
-                        Navigator.pushReplacement(context,
-                            MaterialPageRoute(builder: (context) => Profile()));
+                        String user=username;
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) => Profile(user.toString())));
                       }),
                   IconButton(
                     icon: Icon(Icons.logout),

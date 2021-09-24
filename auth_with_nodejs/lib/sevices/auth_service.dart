@@ -60,27 +60,26 @@ class AuthService {
     try {
       List<Data> _list = [];
       final response =
-      await http.get("http://192.168.0.160:3000/profile/getProfile");
+          await http.get("http://192.168.0.160:3000/profile/getProfile");
       final bodyResponse = jsonDecode(response.body);
-      print(bodyResponse['data']);
+
       if (bodyResponse['data'] != null) {
         for (var data in bodyResponse['data']) {
           Data profile = new Data(
-              id:data["_id"],
-              username:data["userName"],
-              name:data["name"],
-              surname:data["surname"],
-              image:data["image"],
-              v:data["__V"]
-    );
+              id: data["_id"],
+              username: data["username"],
+              name: data["name"],
+              surname: data["surname"],
+              image: data["image"],
+              v: data["__V"]);
+         // print("data" + profile.username.toString());
           _list.add(profile);
-    }
-
-    }
-    print(_list.length);
-    return _list;
+        }
+      }
+      print(_list[0].name.toString());
+      return _list;
     } on DioError catch (e) {
-    print("hata" + e.message);
+      print("hata" + e.message);
     }
   }
 }
