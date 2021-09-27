@@ -56,6 +56,7 @@ class AuthService {
     }
   }
 
+  
   Future<List<Data>> getProfileInfo() async {
     try {
       List<Data> _list = [];
@@ -72,12 +73,45 @@ class AuthService {
               surname: data["surname"],
               image: data["image"],
               v: data["__V"]);
-         // print("data" + profile.username.toString());
+          // print("data" + profile.username.toString());
           _list.add(profile);
         }
       }
       print(_list[0].name.toString());
       return _list;
+    } on DioError catch (e) {
+      print("hata" + e.message);
+    }
+  }
+  
+  updateUser(
+      {String parameterUsername, String username, String password})async{
+    try{
+      print( "username "+parameterUsername.toString());
+      return await dio.put("http://192.168.0.160:3000/users/updateUser/$parameterUsername",data: {
+        "username":username,
+      },options: Options(contentType: Headers.formUrlEncodedContentType));
+    }on DioError catch(e){
+      print("hata" + e.message);
+    }
+  }
+
+  updateProfileInfo(
+      {String parameterUsername,
+      String username,
+      String name,
+      String surname,
+      String image}) async {
+    try {
+     return await dio.put(
+          "http://192.168.0.160:3000/profile/update/:$parameterUsername",
+          data: {
+            "username": username,
+            "name": name,
+            "surname": surname,
+            "image": image,
+          },
+          options: Options(contentType: Headers.formUrlEncodedContentType));
     } on DioError catch (e) {
       print("hata" + e.message);
     }

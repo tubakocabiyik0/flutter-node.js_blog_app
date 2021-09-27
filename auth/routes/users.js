@@ -12,6 +12,6 @@ router.get('/info',actions.getInfo);
 
 router.delete('/deleteUser',actions.delete);
 
-router.put('/updateUser/:username',actions.update);
+router.put('/updateUser/:getUsername',actions.update);
 
 module.exports = router;

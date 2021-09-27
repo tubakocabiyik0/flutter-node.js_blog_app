@@ -46,66 +46,84 @@ promise.then((data)=>{
        const payload={
          username:username
        };
-       const token = jwt.sign(payload,configKey.secret_key,{
-         expiresIn:720
+        const token = jwt.sign(payload, configKey.secret_key, {
+         expiresIn: 720
        });
-       res.json({success:true,token:token});
+        res.json({ success: true, token: token });
 
-      }else{
-        res.json({success:false,msg:'password not true'});
+      } else {
+        res.json({ success: false, msg: 'password not true' });
       }
     });
   }
-}).catch((err)=>{
-res.json({success:false,msg:err});
+}).catch((err) => {
+  res.json({ success: false, msg: err });
 
 });
 
-},
+  },
 
-getInfo:(req,res)=>{
- if(req.headers.authorization && req.headers.authorization.split(' ')[0] ==='Bearer'){
-    var token=req.headers.authorization.split(' ')[1];
-    var decodeToken = jwt.decode(token,configKey.secret_key);
-    res.json({success:true,msg:decodeToken.username})
- }
-},
+  getInfo: (req, res) => {
+    if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
+      var token = req.headers.authorization.split(' ')[1];
+      var decodeToken = jwt.decode(token, configKey.secret_key);
+      res.json({ success: true, msg: decodeToken.username })
+    }
+  },
 
-delete:(req,res)=>{
-const{username,password}=req.body;
-const promise =User.findOneAndDelete({username:username});
-promise.then((result)=>{
-if(result){
- res.json({success:true,msg:'Account deleted'});
-}else{
-  res.json({success:true,msg:'Account didnt delete'});
+  delete: (req, res) => {
+  const { username, password } = req.body;
+  const promise = User.findOneAndDelete({ username: username });
+  promise.then((result) => {
+  if (result) {
+  res.json({ success: true, msg: 'Account deleted' });
+} else {
+  res.json({ success: true, msg: 'Account didnt delete' });
 }
 });
 
-},
+  },
 
-  update: (req, res) => {
-  const promise = User.findOneAndUpdate(req.params.username,req.body,{new:true});
-  promise.then((result)=>{
-    if(result){
-      res.json({success:true,msg:'updated'});
-     }else{
-       res.json({success:true,msg:' didnt updated'});
-     }
-  });
+  update: async(req, res) => {
+    const { username } = req.body;
+    await User.findOne({ username: username }).then((result) => {
+    
+      if (result == null) {
+        User.findOneAndUpdate( {username:req.params.getUsername},{username:req.body.username}).then((result) => {
+         
+         return res.json({ success: true, msg: 'updated' });
+     
+      }).catch((err)=>{
+        return res.json({ success: false, msg: err });
+      });   
+    
+      } else {
+        res.json({ success: false, msg: ' This username cant usable' });
+      }
+    }); 
+
+
+  
 
 
 },
-updateProfile:(req,res)=>{
-    const promise = profile.findOneAndUpdate(req.params.username, req.body, { new: true });
-    promise.then((result) => {
-  if (result) {
-    res.json({success:true,msg:'updated'});
-  } else {
-     res.json({success:true,msg:' didnt updated'});
-  }
-    });
-},
+  updateProfile: (req, res) => {
+    const { username,name, surname ,image } = req.body;
+    Profile.findOne({ username: username }).then((result) => {
+      if (result == null) {
+        const promise = Profile.findOneAndUpdate(req.params.username, req.body);
+        promise.then((result) => {
+            if (result) {
+            res.json({ success: true, msg: 'updated' });
+            } else {
+              res.json({ success: false, msg: ' didnt updated' });
+            }
+        });
+        res.json({ success: true, msg: 'updated' });
+      }  else{
+        res.json({ success: false, msg: ' This username using' });
+      }
+})},
 
 addProfileInfos:(req,res)=>{
   const {username,password}=req.body;

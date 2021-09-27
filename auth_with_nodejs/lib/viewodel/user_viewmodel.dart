@@ -141,14 +141,51 @@ class UserViewModel with ChangeNotifier {
     } finally {
       _usersViewState = UsersViewState.Idle;
     }
-
   }
 
-  Future<List<Data>> getProfile () async{
-    try{
+  Future<List<Data>> getProfile() async {
+    try {
       _usersViewState = UsersViewState.Busy;
       return await AuthService().getProfileInfo();
-    }finally{
+    } finally {
+      _usersViewState = UsersViewState.Idle;
+    }
+  }
+
+  Future updateProfile(String parameterUsername, String username, String name,
+      String surname, String image) async {
+    try {
+      _usersViewState = UsersViewState.Busy;
+      await AuthService().updateProfileInfo().then((val) async {
+        if (val.data['success']) {
+          return Future.value(null);
+        } else {
+          String result = val.data['msg'].toString();
+          _resultMessage = result;
+          return result;
+        }
+      });
+    } finally {
+      _usersViewState = UsersViewState.Idle;
+    }
+  }
+
+  Future<String> updateUser(
+      {String parameterUsername, String username, String password}) async {
+    try {
+      _usersViewState = UsersViewState.Busy;
+      await AuthService().updateUser(parameterUsername: parameterUsername,username: username).then((val) async {
+        if (val.data['success']) {
+          print("burası viewmodel");
+          return Future.value(null);
+        } else {
+          String result = val.data['msg'].toString();
+          _resultMessage = result;print
+            ("hata"+_resultMessage);
+          return result;
+        }
+      });
+    } finally {
       _usersViewState = UsersViewState.Idle;
     }
   }
