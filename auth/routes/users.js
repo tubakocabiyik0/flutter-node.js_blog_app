@@ -10,7 +10,7 @@ router.post('/authentication',actions.authenticate);
 
 router.get('/info',actions.getInfo);
 
-router.delete('/deleteUser',actions.delete);
+router.delete('/deleteUser',actions.deleteUser);
 
 router.put('/updateUser/:getUsername',actions.update);
 

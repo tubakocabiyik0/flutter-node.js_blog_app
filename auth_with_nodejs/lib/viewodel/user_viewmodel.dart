@@ -156,8 +156,9 @@ class UserViewModel with ChangeNotifier {
       String surname, String image) async {
     try {
       _usersViewState = UsersViewState.Busy;
-      await AuthService().updateProfileInfo().then((val) async {
+      await AuthService().updateProfileInfo(parameterUsername: parameterUsername,username: username,name: name,surname: surname,image: image).then((val) async {
         if (val.data['success']) {
+          print("success ");
           return Future.value(null);
         } else {
           String result = val.data['msg'].toString();
@@ -176,12 +177,45 @@ class UserViewModel with ChangeNotifier {
       _usersViewState = UsersViewState.Busy;
       await AuthService().updateUser(parameterUsername: parameterUsername,username: username).then((val) async {
         if (val.data['success']) {
-          print("burası viewmodel");
           return Future.value(null);
         } else {
           String result = val.data['msg'].toString();
-          _resultMessage = result;print
-            ("hata"+_resultMessage);
+          _resultMessage = result;
+
+          return result;
+        }
+      });
+    } finally {
+      _usersViewState = UsersViewState.Idle;
+    }
+  }
+  deleteUser(String username)async{
+    try {
+      _usersViewState = UsersViewState.Busy;
+      await AuthService().deleteUser(username).then((val) async {
+        if (val.data['success']) {
+          print("success ");
+          return Future.value(null);
+        } else {
+          String result = val.data['msg'].toString();
+          _resultMessage = result;
+          return result;
+        }
+      });
+    } finally {
+      _usersViewState = UsersViewState.Idle;
+    }
+  }
+  deleteProfile(String username)async{
+    try {
+      _usersViewState = UsersViewState.Busy;
+      await AuthService().deleteProfile(username).then((val) async {
+        if (val.data['success']) {
+          print("success ");
+          return Future.value(null);
+        } else {
+          String result = val.data['msg'].toString();
+          _resultMessage = result;
           return result;
         }
       });

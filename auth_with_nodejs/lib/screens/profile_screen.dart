@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:auth_with_nodejs/model/Profile.dart';
+import 'package:auth_with_nodejs/screens/settings_screen.dart';
 import 'package:auth_with_nodejs/viewodel/user_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 class Profile extends StatefulWidget {
@@ -22,7 +26,10 @@ class _ProfileState extends State<Profile> {
   String surname;
   String username;
   String newUsername;
-
+  String newName;
+  String newSurname;
+  String newImage;
+  PickedFile _image;
   @override
   void initState() {
     // TODO: implement initState
@@ -39,24 +46,50 @@ class _ProfileState extends State<Profile> {
             {
               if (_list[i].username == widget.user)
                 {
-                  this.setState(() {
-                    Myimage = _list[i].image.toString();
-                    name = _list[i].name;
-                    surname = _list[i].surname;
-                    username = _list[i].username;
-                  })
+                  if(mounted){
+                    this.setState(() {
+                      Myimage = _list[i].image.toString();
+                      name = _list[i].name;
+                      surname = _list[i].surname;
+                      username = _list[i].username;
+                    }),
+                  }
                 }
             }
+
         });
     return Scaffold(
       backgroundColor: Colors.green.shade100,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right:278.0),
+            child: BackButton(color: Colors.black87,
+            onPressed: (){
+            Navigator.pop(context);
+            },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(right:13.0),
+            child: IconButton(icon:Icon(Icons.settings,color: Colors.black87,),onPressed: (){
+              Navigator.of(context).push(MaterialPageRoute(builder: (context)=>Settings()));
+
+            },),
+
+          ),
+
+        ],
         backgroundColor: Colors.green.shade100,
         elevation: 0,
       ),
       body: Column(
         children: [
-          imagePart(_list),
+          Stack(
+            clipBehavior: Clip.none,
+            children: [imagePart(_list),
+            cameraButton(),],),
           SizedBox(
             height: 15,
           ),
@@ -109,13 +142,19 @@ class _ProfileState extends State<Profile> {
   }
 
   imagePart(List<Data> list) {
-    return Center(
-      child: GestureDetector(
+
+    return Myimage.toString() == "https://www.kindpng.com/picc/m/24-248253_user-profile-default-image-png-clipart-png-download.png" ? Center(
         child: CircleAvatar(
-          backgroundImage: NetworkImage(Myimage.toString()),
+          backgroundImage:_image == null ?  NetworkImage(Myimage.toString()) : FileImage(File(_image.path)),
           maxRadius: 75,
           minRadius: 50,
         ),
+
+    ) : Center(
+      child: CircleAvatar(
+        backgroundImage:_image == null ? FileImage(File(Myimage.toString())) : FileImage(File(_image.path)),
+        maxRadius: 75,
+        minRadius: 50,
       ),
     );
   }
@@ -170,7 +209,7 @@ class _ProfileState extends State<Profile> {
   }
 
   namePart() {
-    return Form(
+    return name== null ? Center(child: CircularProgressIndicator()) : Form(
         child: Padding(
       padding: EdgeInsets.only(
           left: MediaQuery.of(context).size.width * 0.05,
@@ -178,7 +217,7 @@ class _ProfileState extends State<Profile> {
       child: TextFormField(
           onChanged: (getString) {
             setState(() {
-              name = getString;
+              newName = getString;
             });
           },
           initialValue: name,
@@ -200,7 +239,8 @@ class _ProfileState extends State<Profile> {
   }
 
   surnamePart() {
-    return Form(
+
+    return surname==null ? Center(child: CircularProgressIndicator(),) : Form(
         child: Padding(
       padding: EdgeInsets.only(
           left: MediaQuery.of(context).size.width * 0.05,
@@ -208,7 +248,7 @@ class _ProfileState extends State<Profile> {
       child: TextFormField(
           onChanged: (getString) {
             setState(() {
-              surname = getString;
+              newSurname = getString;
             });
           },
           initialValue: surname,
@@ -247,11 +287,16 @@ class _ProfileState extends State<Profile> {
                 auto = true;
               });
             } else {
+
               usernameKey.currentState.save();
               String result=await userViewModel.updateUser(
                   parameterUsername: parameterUSername, username: newUsername);
               if(result==null){
-                Fluttertoast.showToast(msg: "updated");
+                String result=await userViewModel.updateProfile(parameterUSername, newUsername, newName, newSurname, newImage);
+               if(result==null){
+               }
+               Fluttertoast.showToast(msg: "updated");
+
               }else{
                String errorMessage=userViewModel.resultMessage;
                Fluttertoast.showToast(msg: errorMessage);
@@ -259,5 +304,67 @@ class _ProfileState extends State<Profile> {
             }
           }),
     );
+  }
+
+  cameraButton() {
+    return Positioned(
+      right: 110,
+      bottom: 0,
+        child: RawMaterialButton(
+          onPressed: () async {
+         return await showPicker();
+          },
+          fillColor:(Colors.green.shade300),
+          shape: CircleBorder(),
+          child: Icon(Icons.camera_alt_outlined),
+
+
+        ));
+  }
+  selectFromGallery()async{
+    ImagePicker imagePicker = ImagePicker();
+    PickedFile image = await  imagePicker.getImage(
+        source: ImageSource.gallery, imageQuality: 50
+    );
+    setState(() {
+      _image=image;
+      newImage=_image.path;
+
+    });
+  }
+  selectFromCamera() async{
+    ImagePicker imagePicker = ImagePicker();
+    PickedFile image= await imagePicker.getImage(source: ImageSource.camera,imageQuality: 50);
+
+    setState(() {
+      _image=image;
+      newImage=_image.path;
+    });
+  }
+
+  Future<void> showPicker() async{
+    switch(await showDialog(context: context,builder:(BuildContext context){
+      return SimpleDialog(
+        title: Text("Choose one"),
+
+        children: [
+
+          SimpleDialogOption(
+          onPressed: () { selectFromGallery();
+          Navigator.pop(context);},
+      child: const Text('Select gallery'),
+      ),
+          SimpleDialogOption(
+            onPressed: () {selectFromCamera();
+            Navigator.pop(context);},
+            child: const Text('Select camera'),
+          ),
+        ],
+
+      ) ;
+    })){
+
+    }
+
   }
 }

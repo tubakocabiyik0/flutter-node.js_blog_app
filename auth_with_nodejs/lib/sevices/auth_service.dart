@@ -56,7 +56,6 @@ class AuthService {
     }
   }
 
-  
   Future<List<Data>> getProfileInfo() async {
     try {
       List<Data> _list = [];
@@ -77,21 +76,20 @@ class AuthService {
           _list.add(profile);
         }
       }
-      print(_list[0].name.toString());
       return _list;
-    } on DioError catch (e) {
-      print("hata" + e.message);
-    }
+    } on DioError catch (e) {}
   }
-  
+
   updateUser(
-      {String parameterUsername, String username, String password})async{
-    try{
-      print( "username "+parameterUsername.toString());
-      return await dio.put("http://192.168.0.160:3000/users/updateUser/$parameterUsername",data: {
-        "username":username,
-      },options: Options(contentType: Headers.formUrlEncodedContentType));
-    }on DioError catch(e){
+      {String parameterUsername, String username, String password}) async {
+    try {
+      return await dio.put(
+          "http://192.168.0.160:3000/users/updateUser/$parameterUsername",
+          data: {
+            "username": username,
+          },
+          options: Options(contentType: Headers.formUrlEncodedContentType));
+    } on DioError catch (e) {
       print("hata" + e.message);
     }
   }
@@ -103,8 +101,8 @@ class AuthService {
       String surname,
       String image}) async {
     try {
-     return await dio.put(
-          "http://192.168.0.160:3000/profile/update/:$parameterUsername",
+      return await dio.put(
+          "http://192.168.0.160:3000/profile/update/$parameterUsername",
           data: {
             "username": username,
             "name": name,
@@ -116,4 +114,24 @@ class AuthService {
       print("hata" + e.message);
     }
   }
+
+  deleteUser(String username) async {
+    try {
+      return dio.delete("http://192.168.0.160:3000/users/deleteUser",
+          data: {"username": username},
+          options: Options(contentType: Headers.formUrlEncodedContentType));
+    } on DioError catch (e) {
+      print("hata" + e.message);
+    }
+  }
+  deleteProfile(String username) async {
+    try {
+      return dio.delete("http://192.168.0.160:3000/profile/deleteProfile",
+          data: {"username": username},
+          options: Options(contentType: Headers.formUrlEncodedContentType));
+    } on DioError catch (e) {
+      print("hata" + e.message);
+    }
+  }
+
 }

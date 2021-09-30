@@ -71,7 +71,7 @@ promise.then((data)=>{
     }
   },
 
-  delete: (req, res) => {
+  deleteUser: (req, res) => {
   const { username, password } = req.body;
   const promise = User.findOneAndDelete({ username: username });
   promise.then((result) => {
@@ -83,6 +83,19 @@ promise.then((data)=>{
 });
 
   },
+  deleteProfile: (req, res) => {
+    const { username } = req.body;
+    const promise = Profile.findOneAndDelete({ username: username });
+    promise.then((result) => {
+    if (result) {
+    res.json({ success: true, msg: 'Account deleted' });
+  } else {
+    res.json({ success: true, msg: 'Account didnt delete' });
+  }
+  });
+  
+    },
+
 
   update: async(req, res) => {
     const { username } = req.body;
@@ -111,15 +124,13 @@ promise.then((data)=>{
     const { username,name, surname ,image } = req.body;
     Profile.findOne({ username: username }).then((result) => {
       if (result == null) {
-        const promise = Profile.findOneAndUpdate(req.params.username, req.body);
-        promise.then((result) => {
-            if (result) {
+       Profile.findOneAndUpdate({username:req.params.username}, {username:username,name:name,surname:surname,image:image}).then((result) => {
+           
             res.json({ success: true, msg: 'updated' });
-            } else {
-              res.json({ success: false, msg: ' didnt updated' });
-            }
+           
+        }).catch((err)=>{
+          return res.json({ success: false, msg: err });
         });
-        res.json({ success: true, msg: 'updated' });
       }  else{
         res.json({ success: false, msg: ' This username using' });
       }
